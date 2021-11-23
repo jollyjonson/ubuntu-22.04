@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.3-labs
 # vim:syntax=dockerfile
-FROM ubuntu:focal-20210921
+FROM ubuntu:jammy-20211029
 
 # Set this before `apt-get` so that it can be done non-interactively
 ENV DEBIAN_FRONTEND noninteractive
@@ -39,19 +39,25 @@ apt-get install -y --no-install-recommends \
   wget
 # Install AWS cli
 pip3 install awscli
-# Use NodeSource's NodeJS 16.x repository
-curl -sSf https://deb.nodesource.com/setup_16.x | bash -
-# Install nvm binary
-curl -sSf https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash
+# Add NodeSource's NodeJS 16.x repository
+# XXX: NodeSource does not support pre-release distros. Use Ubuntu's nodejs package until official release
+#curl -sSf https://deb.nodesource.com/setup_16.x | bash -
+#apt-get update
 # Install nodejs/npm
-apt-get update
+# TODO: Remove `npm` when switching to NodeSource repo
 apt-get install -y --no-install-recommends \
-  nodejs
+  nodejs \
+  npm
+# Install nvm binary
+curl -sSf https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
 # Install other javascript package managers
 npm install -g yarn pnpm
 # Install newer version of Go than is included with Ubuntu 20.04
-curl -sSf https://dl.google.com/go/go1.14.9.linux-amd64.tar.gz | tar -xz -C "$GO_PARENT_DIR"
-# Install Rust, with MUSL libc toolchain
+curl -sSf https://dl.google.com/go/go1.17.3.linux-amd64.tar.gz | tar -xz -C "$GO_PARENT_DIR"
+# Install Rust prereqs
+apt-get install -y --no-install-recommends \
+  musl-tools
+# Install Rust and Rust tools
 curl -sSf https://sh.rustup.rs | sh -s -- -y
 curl -sSf https://just.systems/install.sh | bash -s -- --to "$RUST_HOME/bin"
 cargo install cargo-bundle-licenses
@@ -62,7 +68,6 @@ cargo install cargo-script
 rustup target install x86_64-unknown-linux-musl
 rm -rf "$RUST_HOME/registry" "$RUST_HOME/git"
 chmod 777 "$RUST_HOME"
-apt-get install -y musl-tools
 # Install gstreamer
 apt-get install -y --no-install-recommends \
   gstreamer1.0-nice \

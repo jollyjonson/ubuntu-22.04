@@ -4,7 +4,7 @@
 
 # NOTE: Requires $PWD to be under $HOME
 
-image="${IMAGE:-"telosalliance/ubuntu-20.04"}"
+image="${IMAGE:-"telosalliance/ubuntu-22.04"}"
 tag="${TAG:-"latest"}"
 
 docker run -it --rm \
