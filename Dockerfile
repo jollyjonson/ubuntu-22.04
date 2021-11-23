@@ -9,8 +9,7 @@ ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 
 # Golang env
-ENV GO_PARENT_DIR /opt
-ENV GOROOT $GO_PARENT_DIR/go
+ENV GOROOT /opt/go
 ENV GOPATH $HOME/work/
 
 # Rust env
@@ -18,8 +17,13 @@ ENV RUST_HOME /opt/rust
 ENV CARGO_HOME $RUST_HOME
 ENV RUSTUP_HOME $RUST_HOME/.rustup
 
+# NodeJS env
+ENV NODE_VERSION v16.13.0
+ENV NODE_BUILD node-$NODE_VERSION-linux-x64
+ENV NODE_BIN /opt/node-$NODE_VERSION-linux-x64/bin
+
 # Set PATH to include custom bin directories
-ENV PATH $GOPATH/bin:$GOROOT/bin:$RUST_HOME/bin:$PATH
+ENV PATH $GOPATH/bin:$GOROOT/bin:$RUST_HOME/bin:$NODE_BIN:$PATH
 
 # KEEP PACKAGES SORTED ALPHABETICALY
 # Do everything in one RUN command
@@ -39,21 +43,20 @@ apt-get install -y --no-install-recommends \
   wget
 # Install AWS cli
 pip3 install awscli
-# Add NodeSource's NodeJS 16.x repository
+# Add NodeSource's NodeJS 16.x repository and install
 # XXX: NodeSource does not support pre-release distros. Use Ubuntu's nodejs package until official release
 #curl -sSf https://deb.nodesource.com/setup_16.x | bash -
 #apt-get update
-# Install nodejs/npm
-# TODO: Remove `npm` when switching to NodeSource repo
-apt-get install -y --no-install-recommends \
-  nodejs \
-  npm
+#apt-get install -y --no-install-recommends \
+#  nodejs
+# Install NodeJS 16.x binary
+curl -sSf https://nodejs.org/dist/$NODE_VERSION/$NODE_BUILD.tar.xz | tar -xJ -C /opt
 # Install nvm binary
 curl -sSf https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
 # Install other javascript package managers
 npm install -g yarn pnpm
 # Install newer version of Go than is included with Ubuntu 20.04
-curl -sSf https://dl.google.com/go/go1.17.3.linux-amd64.tar.gz | tar -xz -C "$GO_PARENT_DIR"
+curl -sSf https://dl.google.com/go/go1.17.3.linux-amd64.tar.gz | tar -xz -C /opt
 # Install Rust prereqs
 apt-get install -y --no-install-recommends \
   musl-tools
