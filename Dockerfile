@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.3-labs
 # vim:syntax=dockerfile
-FROM ubuntu:jammy-20211029
+FROM ubuntu:jammy-20220801
 
 # Set this before `apt-get` so that it can be done non-interactively
 ENV DEBIAN_FRONTEND noninteractive
@@ -43,20 +43,21 @@ apt-get install -y --no-install-recommends \
   wget
 # Install AWS cli
 pip3 install awscli
-# Add NodeSource's NodeJS 16.x repository and install
-# XXX: NodeSource does not support pre-release distros. Use Ubuntu's nodejs package until official release
-#curl -sSf https://deb.nodesource.com/setup_16.x | bash -
-#apt-get update
-#apt-get install -y --no-install-recommends \
-#  nodejs
-# Install NodeJS 16.x binary
-curl -sSf https://nodejs.org/dist/$NODE_VERSION/$NODE_BUILD.tar.xz | tar -xJ -C /opt
+# Use kitware's CMake repository for up-to-date version
+curl -sSf https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | apt-key add -
+apt-add-repository 'deb https://apt.kitware.com/ubuntu/ jammy main'
+apt-get install -y --no-install-recommends \
+  cmake
+# Use NodeSource's NodeJS 18.x repository
+curl -sSf https://deb.nodesource.com/setup_18.x | bash -
+apt-get install -y --no-install-recommends \
+  nodejs
 # Install nvm binary
-curl -sSf https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+curl -sSf https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 # Install other javascript package managers
 npm install -g yarn pnpm
-# Install newer version of Go than is included with Ubuntu 20.04
-curl -sSf https://dl.google.com/go/go1.17.3.linux-amd64.tar.gz | tar -xz -C /opt
+# Install newer version of Go than is included with Ubuntu
+curl -sSf https://dl.google.com/go/go1.19.linux-amd64.tar.gz | tar -xz -C /opt
 # Install Rust prereqs
 apt-get install -y --no-install-recommends \
   musl-tools
@@ -68,7 +69,8 @@ cargo install cargo-deny
 cargo install cargo-license
 cargo install cargo-lichking
 cargo install cargo-script
-rustup target install x86_64-unknown-linux-musl
+rustup target add x86_64-unknown-linux-musl
+rustup target add armv7-unknown-linux-gnueabihf
 rm -rf "$RUST_HOME/registry" "$RUST_HOME/git"
 chmod 777 "$RUST_HOME"
 # Install gstreamer
@@ -88,7 +90,6 @@ apt-get install -y --no-install-recommends \
   autoconf \
   automake \
   bc \
-  cmake \
   cpio \
   cppcheck \
   device-tree-compiler \
@@ -113,10 +114,12 @@ apt-get install -y --no-install-recommends \
   locales-all \
   lzop \
   ncurses-dev \
+  openssh-client \
   pandoc \
   rsync \
   shellcheck \
   swig \
+  time \
   unzip \
   uuid-dev \
   valgrind \
