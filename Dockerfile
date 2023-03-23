@@ -64,6 +64,7 @@ apt-get install -y --no-install-recommends \
 # Install Rust and Rust tools
 curl -sSf https://sh.rustup.rs | sh -s -- -y
 curl -sSf https://just.systems/install.sh | bash -s -- --to "$RUST_HOME/bin"
+cargo install cargo-about
 cargo install cargo-bundle-licenses
 cargo install cargo-deny
 cargo install cargo-license
