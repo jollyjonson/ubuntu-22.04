@@ -101,6 +101,7 @@ apt-get install -y --no-install-recommends \
   gettext \
   git \
   gosu \
+  jq \
   kmod \
   libasound2-dev \
   libavahi-compat-libdnssd-dev \
