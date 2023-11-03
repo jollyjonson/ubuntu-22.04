@@ -25,6 +25,8 @@ ENV NODE_BIN /opt/node-$NODE_VERSION-linux-x64/bin
 # Set PATH to include custom bin directories
 ENV PATH $GOPATH/bin:$GOROOT/bin:$RUST_HOME/bin:$NODE_BIN:$PATH
 
+ARG BOOST_VERSION=1.83.0
+
 # KEEP PACKAGES SORTED ALPHABETICALY
 # Do everything in one RUN command
 RUN /bin/bash <<EOF
@@ -106,7 +108,6 @@ apt-get install -y --no-install-recommends \
   kmod \
   libasound2-dev \
   libavahi-compat-libdnssd-dev \
-  libboost-all-dev \
   libcurl4-openssl-dev \
   libncurses5-dev \
   libsndfile1-dev \
@@ -129,6 +130,16 @@ apt-get install -y --no-install-recommends \
   vim \
   zip \
   zlib1g-dev
+
+# download, build and install the specific boost version from source given by the BOOST_VERSION ARG
+cd /tmp && \
+  wget https://boostorg.jfrog.io/artifactory/main/release/${BOOST_VERSION}/source/boost_$(echo ${BOOST_VERSION} | tr . _).tar.bz2 && \
+  tar --bzip2 -xf boost_$(echo ${BOOST_VERSION} | tr . _).tar.bz2 && \
+  cd boost_$(echo ${BOOST_VERSION} | tr . _) && \
+  ./bootstrap.sh --with-python=python --prefix=/usr/local && \
+  ./b2 install && \
+  cd .. && rm -rf /tmp/*
+
 apt-get clean
 rm -rf /var/lib/apt/lists/*
 EOF
